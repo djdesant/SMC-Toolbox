@@ -64,7 +64,8 @@ Bc2=Bc(nn-pp+1:nn,:);
 [T,temp]=qr(Bc2);
 T=(flipud(T'))';
 clear temp;
-Tb=[eye(nn-pp) -Bc1*inv(Bc2'*Bc2)*Bc2'; zeros(pp,nn-pp) T'];
+%Tb=[eye(nn-pp) -Bc1*inv(Bc2'*Bc2)*Bc2'; zeros(pp,nn-pp) T'];
+Tb=[eye(nn-pp) -Bc1*pinv(Bc2'*Bc2)*Bc2'; zeros(pp,nn-pp) T'];
 
 
 Aa=Tb*Ac*inv(Tb);                  % In this new coordinate system

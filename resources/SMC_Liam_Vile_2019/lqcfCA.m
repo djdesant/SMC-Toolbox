@@ -1,4 +1,4 @@
-function [S,E]=lqcf(A,B,Q)
+function [S,E]=lqcfCA(A,B,Q)
 
 % [S,E]=lqcf(A,B,Q)
 %

@@ -6,13 +6,14 @@ Ct=C*inv(Tr);
 
 [Ai,Bvi]=intac(At,Bv,Ct); 
 
-[A, Bv, Tr, CA]=SMCCanForm(Ai, Bi)
+[A, Bv, Tr, CA]=SMCCanForm(Ai, Bvi)
 
 [S,E]=lqcfCA(Ai,Bvi,Q);
 
 Phi=-eye(size(S,1));
 
-[L,Lr,Lrdot,Sr,Lam,P]=contliaCA(At,Bv,Ct,S,Phi);
+% [L,Lr,Lrdot,Sr,Lam,P]=contliaCA(At,Bv,Ct,S,Phi);
+[L,Lr,Lrdot,Sr,Lam,P]=contliaCA2(At,Bv,Ct,S,Phi);
 
 [nn ll]=size(Bv);
 TT=[eye(size(S,1)) zeros(ll, nn)

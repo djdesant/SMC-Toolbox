@@ -1,4 +1,4 @@
-function [L,Lr,Lrdot,Sr,Lam,P]=contliaCA(A,B,C,S,Phi,Sr)
+function [L,Lr,Lrdot,Sr,Lam,P]=contliaCA2(A,B,C,S,Phi,Sr)
 %
 % [L,Lr,Lrdot,Sr,Lam,P]=contlia(A,B,C,S,Phi,Sr)
 %
@@ -31,7 +31,7 @@ function [L,Lr,Lrdot,Sr,Lam,P]=contliaCA(A,B,C,S,Phi,Sr)
 %
 
 [pp,nn]=size(C);
-[ll, nn]=size(S);
+[ll,nn]=size(S);
 [nn,mm]=size(B);
 
 %----------------------------------------------------------------------------%
