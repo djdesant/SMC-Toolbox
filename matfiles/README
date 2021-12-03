@@ -12,10 +12,15 @@ oxymodel.mat       20/8/98       A multivariable furnace model from 9.1 [1]
 rpv.mat            20/8/98       Remotely piloted vehicle model
 vertint.mat        20/8/98       Aircraft model from 4.5 [1] (full data)
 hecka.mat          20/1/00       Aircraft model from [2]
+bwb.mat            ../7/2019     Blended wing body from [3]
 
-[1] C.Edwards & S.K. Spurgeon, `Sliding Mode Control: Theory and Applications',
+[1] C.Edwards & S.K. Spurgeon, 'Sliding Mode Control: Theory and Applications',
 Taylor & Francis, 1998 
 
-[2] B.S. Heck and S.V. Yallapragada and M.K.H. Fan, `Numerical methods to 
+[2] B.S. Heck and S.V. Yallapragada and M.K.H. Fan, 'Numerical methods to 
 design the reaching phase of output feedback variable structure control',
-Automatica (1995), 31, pages 275--279.      
+Automatica (1995), 31, pages 275--279.
+
+[3] L.Vile, H.Alwi & C.Edwards 'Fault Tolerant Control of a
+Blended Wing Body Aircraft using Priority Weighted Control Allocation and
+Sliding Modes' (2019)
