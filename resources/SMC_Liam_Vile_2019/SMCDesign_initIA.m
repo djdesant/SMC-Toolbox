@@ -37,11 +37,11 @@ if ~isempty(E)
         % check if the poles are conjugated complex
         if ~isreal(E(Eid))
             psm(i)=po_factor*real(E(Eid));
-            Eid=Eid+2;
+% %             Eid=Eid+2;
         else
             psm(i)=po_factor*E(Eid);
-            Eid=Eid+1;
         end
+        Eid=Eid+1;
     end
 end
 
