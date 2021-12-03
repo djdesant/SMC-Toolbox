@@ -79,7 +79,6 @@ if nargin==3
         p=p(:);
         msg=polechk(p,pp,1);
     end
-    a
 else if nargin==5
         msg=polechk(per,pp,1);
         if ~isempty(msg)
