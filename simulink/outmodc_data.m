@@ -35,7 +35,7 @@ switch mat_name
         Q=diag([5 1 1 5 5]);
 
         % design of sliding mode poles via LQR
-        [S,E]=lqcf(A,B,Q);
+        [~,E]=lqcf(A,B,Q);
 
         % Design the dynamic compensator
         % ped = -5; %  desired pole(s) for error dynamics (Lo)
@@ -57,7 +57,7 @@ switch mat_name
         %P=0.25*eye(m);
 
         x0=zeros(1,n);
-        x0(1)=1;
+        x0(2)=0.1;
 
         xc0=zeros(1,n-p);
         xc0(1)=0;
@@ -65,7 +65,7 @@ switch mat_name
         rho=1;
         delta=0.001;
 
-        SimStopTime=10;
+        SimStopTime=100;
 end
 
 %% Simulate the model

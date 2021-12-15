@@ -1,4 +1,4 @@
-function replace(oldblock,newblock)
+function replace_block(oldblock,newblock)
 
 
 

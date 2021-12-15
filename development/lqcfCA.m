@@ -52,20 +52,20 @@ function [S,E]=lqcfCA(A,B,Q)
 %----------------------------------------------------------------------------%
 % Check if Q is the right size and positive definite symmetric
 %----------------------------------------------------------------------------%
-if nn~=nnx | nn~=nny
+if nn~=nnx || nn~=nny
    error('The matrix Q is not consistent with the state dimension');end
 
 nnx = norm(Q,1);
-if any(eig(Q) <= eps*nnx) | (norm(Q'-Q,1)/nnx > eps)
+if any(eig(Q) <= eps*nnx) || (norm(Q'-Q,1)/nnx > eps)
    error('The matrix Q is not symmetric and positive definite');end
 
 %----------------------------------------------------------------------------%
 % Obtain the regular form transformation using the function 
 %----------------------------------------------------------------------------%
 
-% [A11,A12,B2,Tr]=regfor(A,B);
+% [A11,A12,A21,A22,B2,Tr]=regfor(A,B);
 [A, Bv, Tr, CA]=SMCCanForm(A, B);
-[A11, A12]=partiton(A, Bv);
+[A11, A12]=partition(A, Bv);
 %----------------------------------------------------------------------------%
 % Transform weighting matrix to regular form coordinate system
 %----------------------------------------------------------------------------%

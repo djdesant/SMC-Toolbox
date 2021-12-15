@@ -14,7 +14,7 @@ mat_name = 'furnobs';  % Chap. 7.4: EXAMPLE: A Temperature Control Scheme
 
 % mat_name = 'aircraft';
 % mat_name = 'compped';
-%mat_name = 'dcmotor';
+mat_name = 'dcmotor';
 % mat_name = 'hecka';
 % mat_name = 'helcopt';
 % mat_name = 'huiex';
@@ -65,6 +65,9 @@ switch mat_name
         G=-inv(C*inv(A+B*F)*B);
         %C=[C; [0,1,0,0,0];[0,0,1,0,0];[0,0,0,1,0]];
         %[G,F]=wzobs(A,B,C,[-5.6+1i*4.2,-5.6-1i*4.2,-1,-0.4,-0.7],-10);
+
+        % Design of observer based controller with integral action
+        [L,Lr,Lrdot,Sr,Lam,P]=contlia(A,B,C,S,Phi);
 
         x0=zeros(1,n); % [xr, x11, x12]
         x0(2)=1;
@@ -122,6 +125,9 @@ switch mat_name
         M=place(A11a,A12a,psm);
         S=[M eye(mm)]*Trtilde';
 
+        % Design of observer based controller with integral action
+        [L,Lr,Lrdot,Sr,Lam,P]=contlia(A,B,C,S,Phi);
+
         x0=zeros(1,n); % [xr, x11, x12]
         x0(1)=0;
         z0=zeros(1,n);
@@ -132,68 +138,84 @@ switch mat_name
         SimStopTime=500;
 
     case 'dcmotor'
+        % reduced dc motor model with speed and current only
+        A(2,2)=-1e-2; % adding friction -Bm/Jm
+        A=A([2:end],[2:end]);
+        B=B([2:end],:);
+        C=C([2:end],[2:end]);
+        [n,m]=size(B);
+        [p,n]=size(C);
+        D=zeros(p,m);
+        C=C(:,:); % current and speed measurement
+        [p,n]=size(C);
+        [pp,nn]=size(C); % n-state vector length, p-number of outputs
 
-        nn=n;pp=p;mm=m;
-        %----------------------------------------------------------------------------%
-        % Augment the statespace with integral action states
-        %----------------------------------------------------------------------------%
-        AT=[zeros(pp,pp) -C; zeros(nn,pp) A];
-        A11a=AT(1:nn,1:nn);
-        A12a=AT(1:nn,nn+1:nn+pp);
+        Q=eye(n);
+        [~,E]=lqcfCA(A,B,Q);
 
-        Co=ctrb(A11a,A12a);
-        unco = length(A) - rank(Co);
+        %%%%%%%%%%%%%%%%%%%%%%%%%% Observer Design %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % move the observer sliding mode poles further to the left
+        % multiplied by factor
+        psm=[];
+        po_factor=5;
+        Eid=1;
+        if ~isempty(E)
+            for i=1:(nn-pp) % ToDo check nn-pp
+                % check if the poles are conjugated complex
+                if ~isreal(E(Eid))
+                    psm(i)=po_factor*real(E(Eid));
+                else
+                    psm(i)=po_factor*E(Eid);
+                end
 
-%         C=C([1,3],:); % partial output matrix to allow a reduced observer design
-%         [p,n]=size(C);
+                if length(E)>(nn-pp)
+                    Eid=Eid+2;
+                else
+                    Eid=Eid+1;
+                end
+            end
+        end
+
+        % check the length of psm
+        [~,~,~,~,r]=outfor(A,B,C);
+        if (nn-pp-r)>0
+            assert(length(psm)==(nn-pp-r));
+        else
+            assert(length(psm)==(nn-pp)); % ToDo check
+        end
+
+        % set the estimation error poles
+        per=-10*ones(1,pp);
+        assert(length(per)==pp);
+
+        [G,F]=wzobs(A,B,C,psm,per);
 
         % Design diagonal weighting matrix for the state vector
         Q=diag([5 5 1]);
 
-        % design of sliding mode poles via LQR
-        [~,E]=lqcf(A,B,Q);
-
-        % Design the dynamic compensator
-        ped = -10; %  desired pole(s) for error dynamics (Lo)
-        psm = E'; % reduced order sliding motion poles
-
-        [G,F]=wzobs(A,B,C,psm,[-10 -10, -10]);
-   
-        Gamma=diag([-0.5]);
+        Gamma=diag([-10.0]);
 
         Phi=-0.1;
 
-        S=rpp(A,B,psm);
-        %S=[S 1 1 1];
+        Cc=[1 0]; % speed control
+        Tc=Cc*inv(eye(n));
+        Ramp=1000;
 
-%         nn=n;pp=p;mm=m;
-%         %----------------------------------------------------------------------------%
-%         % Augment the statespace with integral action states
-%         %----------------------------------------------------------------------------%
-%         AT=[zeros(pp,pp) -C; zeros(nn,pp) A];
-%         A11a=AT(1:nn,1:nn);
-%         A12a=AT(1:nn,nn+1:nn+pp);
-% 
-%         Co=ctrb(A11a,A12a);
-%         unco = length(A) - rank(Co);
-% 
-%         if unco==0
-%             Tr=eye(nn);
-%         else
-%             [~,~,~,~,~,Tr]=regfor(A,B);
-%             %BT=[zeros(pp,mm); B];
-%         end
-% 
-%         %----------------------------------------------------------------------------%
-%         % Change coordinates so that regular form is achieved
-%         %----------------------------------------------------------------------------%
-%         Trtilde=[eye(pp) zeros(pp,nn);zeros(nn,pp) Tr];
-%         ATnew=Trtilde*AT*Trtilde';
-%         A11a=ATnew(1:nn,1:nn);
-%         A12a=ATnew(1:nn,nn+1:nn+pp);
-% 
-%         M=place(A11a,A12a,psm);
-%         S=[M eye(mm)]*Trtilde';
+        [Ai,Bi]=intac(A,B,Cc);
+
+        Qi = eye(length(Ai));
+
+        [S,E]=lqcfCA(Ai,Bi,Qi);
+        Eopt=E;
+        %Eopt(Eopt>-1)=-1;
+        S=rpp(Ai,Bi,Eopt);
+
+        Phi=-eye(size(S,1));
+
+        [L,Lr,Lrdot,Sr,Lam,P]=contliaCA(A,B,Cc,S,Phi);
+        Lam_inv=inv(Lam);
+
+        pm=size(Cc,1);
 
         x0=zeros(1,n); % [xr, x11, x12]
         x0(1)=0;
@@ -202,12 +224,11 @@ switch mat_name
         rho=1;
         delta=0.001;
 
-        SimStopTime=250;
+        SimStopTime=20;
 
 end
 
-% Design of observer based controller with integral action
-[L,Lr,Lrdot,Sr,Lam,P]=contlia(A,B,C,S,Phi);
+
 
 
 %% Simulate the model
@@ -232,18 +253,20 @@ legend(get_legend('s'));
 
 subplot(2,3,3)
 plot(t.Data,r.Data);
+hold on;
+plot(t.Data,ym.Data);
 grid on;
-legend(get_legend('r'));
+legend([get_legend('r');get_legend('ym')]);
 
 subplot(2,3,4)
+plot(t.Data,x.Data);
+grid on;
+legend(get_legend('x'));
+
+subplot(2,3,5)
 plot(t.Data,y.Data);
 grid on;
 legend(get_legend('y'));
-
-subplot(2,3,5)
-plot(t.Data,ym.Data);
-grid on;
-legend(get_legend('ym'));
 
 subplot(2,3,6)
 plot(t.Data,ey.Data);

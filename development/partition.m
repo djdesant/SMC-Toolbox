@@ -1,4 +1,4 @@
-function [A11, A12]=partiton(A, Bv)
+function [A11, A12]=partition(A, Bv)
 
 
 [nn,ll]=size(Bv);
