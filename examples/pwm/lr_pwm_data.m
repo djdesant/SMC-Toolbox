@@ -1,8 +1,8 @@
 clc; clear all;
 
 %% Plant Parameter
-R_l=4; % [Ohm]
-L_l=0.150; % [H]
+R_l=10; % [Ohm]
+L_l=0.044; % [H]
 %T_s=1e-2; % [s]
 T_s=1e-2; % [s]
 w_s = 1/T_s; % [Hz]
@@ -11,12 +11,12 @@ f_s = w_s/(2*pi);
 R_s=0.1;
 C_s=T_s/R_s;
 w_gR=2*pi*10; % [rad/s]
-f_pwm=125; % [Hz]
+f_pwm=100; % [Hz]
 T_pwm=1/f_pwm; % [s]
 %T_pwmsim=T_pwm/10; % [s]
 T_sim=T_pwm/200; % [s] min. less then 1/100 of pwm period
 %w_s = 2*pi*1/T_s;
-U_e=12.5; % [V]
+U_e=24; % [V]
 d=0.1;
 
 %% State Space Matrices
@@ -146,7 +146,7 @@ Qi=diag([50 5 1]);
 % S=rpp(Ai,Bi,Eopt);
 
 % design the dynamics of the PI controller
-Phi=-150*eye(size(S,1));
+Phi=-200*eye(size(S,1));
 
 [L,Lr,Lrdot,Sr,Lam,P]=contliaCA(Ao_s,Bo_s,Co_s,S,Phi);
 Lam_inv=inv(Lam);
